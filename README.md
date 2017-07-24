@@ -2,11 +2,15 @@
 
 This is a guide to install [Kubo](https://github.com/cloudfoundry-incubator/kubo-release) on BOSH Lite
 
+## Requirements
+
+* Virtualbox
+
 ## Bosh Lite Installation
 1. First checkout the `bosh-deployment` and `kubo-bosh-lite` repos
 ```bash
 git clone https://github.com/cloudfoundry/bosh-deployment 
-git@github.com:bstick12/kubo-bosh-lite.git
+git clone git@github.com:bstick12/kubo-bosh-lite.git
 ```
 2. Create a directory to store the our state and credentials
 ```bash
