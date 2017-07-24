@@ -78,7 +78,9 @@ This is a guide to install [Kubo](https://github.com/cloudfoundry-incubator/kubo
 
 1. Add a route to allow access to the deployment of kubo
 	```bash
-	sudo ip route add 10.240.0.0/16 via 192.168.50.6	```
+	sudo ip route add 10.240.0.0/16 via 192.168.50.6	# Linux
+	sudo route add -net 10.240.0.0/16 192.168.50.6		# OS X
+	```
 
 1. Set-up 'kubectl' to access the newly created cluster
 	```bash
