@@ -31,7 +31,7 @@ This is a guide to install [Kubo](https://github.com/cloudfoundry-incubator/kubo
 	-o bosh-deployment/bosh-lite.yml \
 	-o bosh-deployment/bosh-lite-runc.yml \
 	-o bosh-deployment/jumpbox-user.yml \
-	-o bosh-deployment/powerdns.yml \
+	-o bosh-deployment/misc/powerdns.yml \
 	-o bosh-deployment/uaa.yml \
 	-o bosh-deployment/credhub.yml \
 	--vars-store kubo/creds.yml \
