@@ -6,7 +6,9 @@ releases:
   url: https://github.com/pivotal-cf-experimental/kubo-etcd/releases/download/v2/kubo-etcd.2.tgz
   sha1: ae95e661cd9df3bdc59ee38bf94dd98e2f280d4f
 - name: kubo
-  version: latest
+  url: https://github.com/cloudfoundry-incubator/kubo-release/releases/download/v0.0.5/kubo-release-0.0.5.tgz
+  version: 0.0.5
+  sha1: 731f704f0b3249b58f4f3c478e469f3a8216e0af
 - name: docker
   version: 28.0.1
   url: https://bosh.io/d/github.com/cf-platform-eng/docker-boshrelease?v=28.0.1
