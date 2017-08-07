@@ -47,8 +47,11 @@ instance_groups:
   - name: haproxy
     release: kubo-haproxy
     consumes:
-      workers_backend:
+      backends:
         from: master_haproxy
+    properties:
+      haproxy:
+        port_range: "8443"
   - name: keepalived
     release: kubo-haproxy
     properties:
@@ -67,8 +70,11 @@ instance_groups:
   - name: haproxy
     release: kubo-haproxy
     consumes:
-      workers_backend:
+      backends:
         from: worker_haproxy
+    properties:
+      haproxy:
+        port_range: "30000-32767"
   - name: keepalived
     release: kubo-haproxy
     properties:
