@@ -1,0 +1,189 @@
+name: kubo-bosh-lite
+
+releases:
+- name: kubo-etcd
+  version: 2
+  url: https://github.com/pivotal-cf-experimental/kubo-etcd/releases/download/v2/kubo-etcd.2.tgz
+  sha1: ae95e661cd9df3bdc59ee38bf94dd98e2f280d4f
+- name: kubo
+  url: https://github.com/cloudfoundry-incubator/kubo-release/releases/download/v0.0.5/kubo-release-0.0.5.tgz
+  version: 0.0.5
+  sha1: 731f704f0b3249b58f4f3c478e469f3a8216e0af
+- name: docker
+  version: 28.0.1
+  url: https://bosh.io/d/github.com/cf-platform-eng/docker-boshrelease?v=28.0.1
+  sha1: 448eaa2f478dc8794933781b478fae02aa44ed6b
+- name: kubo-haproxy
+  version: latest
+
+stemcells:
+- alias: trusty
+  os: ubuntu-trusty
+  version: 3421.11
+
+instance_groups:
+- name: etcd
+  instances: 1
+  networks:
+  - name: default
+  azs: [z1]
+  jobs:
+  - name: etcd
+    release: kubo-etcd
+    properties:
+      etcd:
+        require_ssl: false
+        peer_require_ssl: false
+  stemcell: trusty
+  vm_type: common
+  persistent_disk_type: 5120
+
+- name: haproxy_master
+  instances: 1
+  networks:
+  - name: default
+  azs: [z1]
+  jobs:
+  - name: haproxy
+    release: kubo-haproxy
+    consumes:
+      workers_backend:
+        from: master_haproxy
+  - name: keepalived
+    release: kubo-haproxy
+    properties:
+      keepalived:
+        vip: 10.240.0.4
+        virtual_router_id: 1
+  stemcell: trusty
+  vm_type: small
+
+- name: haproxy_worker
+  instances: 2
+  networks:
+  - name: default
+  azs: [z1]
+  jobs:
+  - name: haproxy
+    release: kubo-haproxy
+    consumes:
+      workers_backend:
+        from: worker_haproxy
+  - name: keepalived
+    release: kubo-haproxy
+    properties:
+      keepalived:
+        vip: 10.240.0.3
+        virtual_router_id: 2
+  stemcell: trusty
+  vm_type: small
+
+- name: master
+  instances: 1
+  networks:
+  - name: default
+  azs: [z1]
+  jobs:
+  - name: flanneld
+    release: kubo
+  - name: kubernetes-api
+    release: kubo
+    properties:
+      admin-username: admin
+      admin-password: ((kubo-admin-password))
+      kubelet-password: ((kubelet-password))
+      backend_port: 8443 # Bosh links hack
+      port: 8443
+      tls:
+        kubernetes: ((tls-kubernetes))
+  - name: kubeconfig
+    release: kubo
+    properties:
+      kubernetes-api-url: &kubo_url "https://((kubernetes_master_host)):8443"
+      kubelet-password: ((kubelet-password))
+      tls:
+        kubernetes: ((tls-kubernetes))
+  - name: kubernetes-controller-manager
+    release: kubo
+  - name: kubernetes-scheduler
+    release: kubo
+  - name: kubernetes-system-specs
+    release: kubo
+    properties:
+      kubernetes-api-url: *kubo_url
+  networks:
+  - name: default
+    static_ips: [10.240.0.2]
+  stemcell: trusty
+  vm_type: master
+
+- name: worker
+  instances: 2
+  networks:
+  - name: default
+  azs: [z1]
+  jobs:
+  - name: flanneld
+    release: kubo
+  - name: docker
+    release: docker
+    properties:
+      docker:
+        flannel: true
+        iptables: false
+        ip_masq: false
+        log_level: error
+        storage_driver: overlay
+      env: {}
+  - name: kubeconfig
+    release: kubo
+    properties:
+      kubernetes-api-url: *kubo_url
+      kubelet-password: ((kubelet-password))
+      tls:
+        kubernetes: ((tls-kubernetes))
+  - name: kubelet
+    release: kubo
+    properties:
+      kubernetes-api-url: *kubo_url
+      tls:
+        kubelet: ((tls-kubelet))
+  - name: kubernetes-proxy
+    release: kubo
+    properties:
+      kubernetes-api-url: *kubo_url
+  stemcell: trusty
+  vm_type: worker
+  persistent_disk_type: 10240
+
+update:
+  canaries: 1
+  max_in_flight: 1
+  serial: true
+  canary_watch_time: 1000-30000
+  update_watch_time: 1000-30000
+
+variables:
+- name: kubo-admin-password
+  type: password
+- name: kubelet-password
+  type: password
+- name: kubo_ca
+  type: certificate
+  options:
+    is_ca: true
+    common_name: ca
+- name: tls-kubelet
+  type: certificate
+  options:
+    ca: kubo_ca
+    common_name: ((kubernetes_master_host))
+    alternative_names: [((kubernetes_master_host))]
+- name: tls-kubernetes
+  type: certificate
+  options:
+    ca: kubo_ca
+    common_name: ((kubernetes_master_host))
+    alternative_names:
+    - ((kubernetes_master_host))
+    - 10.100.200.1
