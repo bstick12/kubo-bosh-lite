@@ -10,6 +10,11 @@ vm_types:
     cpu: 2
     ram: 1024
     disk: 3240
+- name: small
+  cloud_properties:
+    cpu: 1
+    ram: 512
+    disk: 3240
 - name: common
   cloud_properties:
     cpu: 2
@@ -43,6 +48,7 @@ networks:
     azs: [z1, z2, z3]
     dns: [8.8.8.8]
     static : [10.240.0.2-10.240.0.10]
+    reserved: [10.240.0.11-10.240.0.20]
 
 compilation:
   workers: 2
