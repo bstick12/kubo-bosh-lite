@@ -35,7 +35,7 @@ This is a guide to install [Kubo](https://github.com/cloudfoundry-incubator/kubo
 	-o bosh-deployment/uaa.yml \
 	-o bosh-deployment/credhub.yml \
 	--vars-store kubo/creds.yml \
-	-v director_name="Bosh Lite Director" \
+	-v director_name="kubo-bosh-lite" \
 	-v internal_ip=192.168.50.6 \
 	-v internal_gw=192.168.50.1 \
 	-v internal_cidr=192.168.50.0/24 \
@@ -87,9 +87,9 @@ This is a guide to install [Kubo](https://github.com/cloudfoundry-incubator/kubo
 	CREDHUB_PWD=$(bosh int --path /credhub_cli_password kubo/creds.yml)
 	CREDHUB_CA_CERT=$(bosh int --path /credhub_tls/ca kubo/creds.yml)
 	credhub login -u credhub-cli -p ${CREDHUB_PWD} -s https://192.168.50.6:8844 --skip-tls-validation
-	bosh int <(credhub get -n "/Bosh Lite Director/kubo-bosh-lite/tls-kubernetes" --output-json) --path=/value/ca > kubo/kubernetes.crt
+	bosh int <(credhub get -n "/kubo-bosh-lite/kubo-bosh-lite/tls-kubernetes" --output-json) --path=/value/ca > kubo/kubernetes.crt
 	kubectl config set-cluster kubo-bosh-lite --server https://10.240.0.2:8443 --embed-certs=true --certificate-authority=kubo/kubernetes.crt 
-	KUBERNETES_PWD=$(bosh int <(credhub get -n "/Bosh Lite Director/kubo-bosh-lite/kubo-admin-password" --output-json) --path=/value)
+	KUBERNETES_PWD=$(bosh int <(credhub get -n "/kubo-bosh-lite/kubo-bosh-lite/kubo-admin-password" --output-json) --path=/value)
 	kubectl config set-credentials "kubo-bosh-lite-admin" --token=${KUBERNETES_PWD}
 	kubectl config set-context "kubo-bosh-lite" --cluster="kubo-bosh-lite" --user="kubo-bosh-lite-admin"
 	kubectl config use-context "kubo-bosh-lite"
