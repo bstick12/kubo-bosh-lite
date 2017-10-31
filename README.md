@@ -31,7 +31,8 @@ This is a guide to install [Kubo](https://github.com/cloudfoundry-incubator/kubo
 	-o bosh-deployment/bosh-lite.yml \
 	-o bosh-deployment/bosh-lite-runc.yml \
 	-o bosh-deployment/jumpbox-user.yml \
-	-o bosh-deployment/misc/powerdns.yml \
+    -o bosh-deployment/local-dns.yml \
+    -o kubo-bosh-lite/ops/dns-addresses.yml \
 	-o bosh-deployment/uaa.yml \
 	-o bosh-deployment/credhub.yml \
 	--vars-store kubo/creds.yml \
@@ -53,9 +54,14 @@ This is a guide to install [Kubo](https://github.com/cloudfoundry-incubator/kubo
 	bosh -e 192.168.50.6 alias-env kubo --ca-cert <(bosh int kubo/creds.yml --path /director_ssl/ca)
 	```
 
+1. Update runtime config for bosh-dns
+	```bash
+  	bosh -e kubo update-runtime-config -n bosh-deployment/runtime-configs/dns.yml
+	```
+
 1. Upload the stemcell for usage with KUBO
 	```bash
-	bosh -e kubo upload-stemcell "https://s3.amazonaws.com/bosh-core-stemcells/warden/bosh-stemcell-3421.11-warden-boshlite-ubuntu-trusty-go_agent.tgz"
+	bosh -e kubo upload-stemcell "https://s3.amazonaws.com/bosh-core-stemcells/warden/bosh-stemcell-3445.11-warden-boshlite-ubuntu-trusty-go_agent.tgz"
 	```
 
 1. Upload the latest version of the Kubo release
