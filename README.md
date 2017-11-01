@@ -19,7 +19,6 @@ This is a guide to install [Kubo](https://github.com/cloudfoundry-incubator/kubo
 	```
 
 1. Create BOSH deployment. Kubo has some additional requirements to the standard BOSH lite installation. 
-	* powerdns
 	* uaa
 	* credhub
 
@@ -31,8 +30,8 @@ This is a guide to install [Kubo](https://github.com/cloudfoundry-incubator/kubo
 	-o bosh-deployment/bosh-lite.yml \
 	-o bosh-deployment/bosh-lite-runc.yml \
 	-o bosh-deployment/jumpbox-user.yml \
-    -o bosh-deployment/local-dns.yml \
-    -o kubo-bosh-lite/ops/dns-addresses.yml \
+	-o bosh-deployment/local-dns.yml \
+	-o kubo-bosh-lite/ops/dns-addresses.yml \
 	-o bosh-deployment/uaa.yml \
 	-o bosh-deployment/credhub.yml \
 	--vars-store kubo/creds.yml \
@@ -46,6 +45,8 @@ This is a guide to install [Kubo](https://github.com/cloudfoundry-incubator/kubo
 
 1. Get the admin password from the `kubo/creds.yml` and then login to your BOSH environment
 	```bash
+	export BOSH_CLIENT=admin
+	export BOSH_CLIENT_SECRET=$(bosh int kubo/creds.yml --path /admin_password)
 	bosh -e 192.168.50.6 login --ca-cert <(bosh int kubo/creds.yml --path /director_ssl/ca) 
 	```
 
