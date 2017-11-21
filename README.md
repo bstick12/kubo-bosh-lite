@@ -62,7 +62,7 @@ This is a guide to install [Kubo](https://github.com/cloudfoundry-incubator/kubo
 
 1. Upload the stemcell for usage with KUBO
 	```bash
-	bosh -e kubo upload-stemcell "https://s3.amazonaws.com/bosh-core-stemcells/warden/bosh-stemcell-3445.11-warden-boshlite-ubuntu-trusty-go_agent.tgz"
+	bosh -e kubo upload-stemcell "https://s3.amazonaws.com/bosh-core-stemcells/warden/bosh-stemcell-3468.5-warden-boshlite-ubuntu-trusty-go_agent.tgz"
 	```
 
 1. Upload the latest version of the Kubo release
