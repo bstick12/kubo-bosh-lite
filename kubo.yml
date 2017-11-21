@@ -5,20 +5,19 @@ features:
 
 releases:
 - name: kubo-etcd
-  version: 2
-  url: https://storage.googleapis.com/kubo-public/kubo-etcd-2-ubuntu-trusty-3445.11-20170927-150426-34307934-20170927150432.tgz
-  sha1: 90d5584a2e6dbe71b2675b6c7395bedb264969d2
+  version: 4
+  url: https://github.com/pivotal-cf-experimental/kubo-etcd/releases/download/v4/kubo-etcd.4.tgz
+  sha1: f94ab00d423765e2c740836788dc256caa1af014
 - name: kubo
   version: latest
 - name: docker
   version: 28.0.1
-  url: https://storage.googleapis.com/kubo-public/docker-28.0.1-ubuntu-trusty-3445.11-20170927-150522-492831268-20170927150533.tgz
-  sha1: 8b5df0aab503e04b1dde9ebd174f018d588400a2
-
+  url: https://bosh.io/d/github.com/cf-platform-eng/docker-boshrelease?v=28.0.1
+  sha1: 448eaa2f478dc8794933781b478fae02aa44ed6b
 stemcells:
 - alias: trusty
   os: ubuntu-trusty
-  version: "3445.11"
+  version: "3468.5"
 
 instance_groups:
 - name: etcd
@@ -41,7 +40,7 @@ instance_groups:
   instances: 1
   networks:
   - name: *network-name
-    static_ips: [10.240.0.2]
+    static_ips: [((kubernetes_master_host))]
   azs: [z1]
   jobs:
   - name: kubo-dns-aliases

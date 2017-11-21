@@ -67,7 +67,7 @@ This is a guide to install [Kubo](https://github.com/cloudfoundry-incubator/kubo
 
 1. Upload the latest version of the Kubo release
 	```bash
-	bosh -e kubo upload-release "https://storage.googleapis.com/kubo-public/kubo-release-latest.tgz"
+	bosh -e kubo upload-release "https://github.com/cloudfoundry-incubator/kubo-release/releases/download/v0.8.1/kubo-release-0.8.1.tgz"
 	```
 
 1. Update the `cloud-config' for the kubo environment
