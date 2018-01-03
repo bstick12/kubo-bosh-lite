@@ -1,8 +1,6 @@
 ---
 azs:
-- name: z1
-- name: z2
-- name: z3
+- name: default
 
 vm_types:
 - name: default
@@ -40,13 +38,13 @@ networks:
   subnets:
   - range: 10.240.0.0/16
     gateway: 10.240.0.1
-    azs: [z1, z2, z3]
+    azs: [default]
     dns: [8.8.8.8]
     static : [10.240.0.2-10.240.0.10]
 
 compilation:
   workers: 2
   reuse_compilation_vms: true
-  az: z1
+  az: default
   vm_type: default
   network: default

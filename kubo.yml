@@ -4,88 +4,78 @@ features:
   use_dns_addresses: true
 
 releases:
-- name: kubo-etcd
-  version: 4
-  url: https://github.com/pivotal-cf-experimental/kubo-etcd/releases/download/v4/kubo-etcd.4.tgz
-  sha1: f94ab00d423765e2c740836788dc256caa1af014
 - name: kubo
-  version: latest
+  version: 0.10.0
+  url: https://github.com/cloudfoundry-incubator/kubo-release/releases/download/v0.10.0/kubo-release-0.10.0.tgz
+- name: kubo-etcd
+  version: '6'
+  url: https://github.com/pivotal-cf-experimental/kubo-etcd/releases/download/v6/kubo-etcd.6.tgz
 - name: docker
-  version: 28.0.1
-  url: https://bosh.io/d/github.com/cf-platform-eng/docker-boshrelease?v=28.0.1
-  sha1: 448eaa2f478dc8794933781b478fae02aa44ed6b
+  version: 30.1.4
+  url: https://github.com/cloudfoundry-community/docker-boshrelease/releases/download/v30.1.4/docker-30.1.4.tgz
 stemcells:
 - alias: trusty
   os: ubuntu-trusty
-  version: "3468.5"
-
+  version: '3468.13'
 instance_groups:
-- name: etcd
-  instances: 1
-  networks:
-  - name: &network-name default
-  azs: [z1]
-  jobs:
-  - name: etcd
-    release: kubo-etcd
-    properties:
-      etcd:
-        require_ssl: false
-        peer_require_ssl: false
-  stemcell: trusty
-  vm_type: common
-  persistent_disk_type: 5120
-
 - name: master
   instances: 1
-  networks:
-  - name: *network-name
-    static_ips: [((kubernetes_master_host))]
-  azs: [z1]
   jobs:
   - name: kubo-dns-aliases
     release: kubo
-  - name: cloud-provider
-    release: kubo
-    properties: {}
   - name: flanneld
     release: kubo
   - name: kubernetes-api
     release: kubo
     properties:
-      admin-username: admin
       admin-password: ((kubo-admin-password))
-      kubelet-password: ((kubelet-password))
-      backend_port: 8443 # Bosh links hack
+      admin-username: admin
+      authorization-mode: rbac
+      backend_port: 8443
+      kube-proxy-password: "((kube-proxy-password))"
+      kube-scheduler-password: "((kube-scheduler-password))"
+      kubelet-password: "((kubelet-password))"
       port: 8443
-      authorization-mode: &authorization_mode rbac
+      route-sync-password: "((route-sync-password))"
       tls:
-        kubernetes: ((tls-kubernetes))
-  - name: kubeconfig
-    release: kubo
-    properties:
-      kubelet-password: ((kubelet-password))
-      tls:
-        kubernetes: ((tls-kubernetes))
+        kubernetes:
+          ca: "((tls-kubernetes.ca))"
+          certificate: "((tls-kubernetes.certificate))"
+          private_key: "((tls-kubernetes.private_key))"
   - name: kubernetes-controller-manager
     release: kubo
-    properties: {}
+    properties:
+      tls:
+        kubernetes: "((tls-kubernetes))"
   - name: kubernetes-scheduler
     release: kubo
+    properties:
+      api-token: "((kube-scheduler-password))"
   - name: kubernetes-system-specs
     release: kubo
     properties:
-      admin-username: admin
       admin-password: ((kubo-admin-password))
-      authorization-mode: *authorization_mode
-  stemcell: trusty
+      admin-username: admin
+      api-token: "((kubelet-password))"
+      authorization-mode: rbac
+      tls:
+        kubernetes: "((tls-kubernetes))"
+  - name: etcd
+    release: kubo-etcd
+    properties:
+      etcd:
+        delete_data_dir_on_stop: false
+        peer_require_ssl: false
+        require_ssl: false
   vm_type: master
-
+  stemcell: trusty
+  azs:
+  - default
+  networks:
+  - name: &network-name default
+    static_ips: [((kubernetes_master_host))]
 - name: worker
   instances: 3
-  networks:
-  - name: *network-name
-  azs: [z1]
   jobs:
   - name: kubo-dns-aliases
     release: kubo
@@ -94,65 +84,71 @@ instance_groups:
   - name: docker
     release: docker
     properties:
-      docker:
-        flannel: true
-        iptables: false
-        ip_masq: false
-        log_level: error
-        storage_driver: overlay
-        default_ulimits: [ "nofile=65536" ]
+      bip: 172.17.0.1/24
+      default_ulimits:
+      - nofile=65536
       env: {}
-  - name: kubeconfig
-    release: kubo
-    properties:
-      kubernetes-api-url: "https://((kubernetes_master_host)):8443"
-      kubelet-password: ((kubelet-password))
-      tls:
-        kubernetes: ((tls-kubernetes))
-  - name: cloud-provider
-    release: kubo
-    properties: {}
+      flannel: true
+      ip_masq: false
+      iptables: false
+      log_level: error
+      storage_driver: overlay
+      store_dir: "/var/vcap/store"
+      tls_cacert: "((tls-docker.ca))"
+      tls_cert: "((tls-docker.certificate))"
+      tls_key: "((tls-docker.private_key))"
   - name: kubelet
     release: kubo
     properties:
+      api-token: "((kubelet-password))"
       tls:
-        kubelet: ((tls-kubelet))
+        kubelet: "((tls-kubelet))"
+        kubernetes: "((tls-kubernetes))"
   - name: kubernetes-proxy
     release: kubo
-  stemcell: trusty
+    properties:
+      api-token: "((kube-proxy-password))"
+      tls:
+        kubernetes: "((tls-kubernetes))"
   vm_type: worker
-  persistent_disk_type: 10240
-
+  stemcell: trusty
+  persistent_disk_type: '10240'
+  azs:
+  - default
+  networks:
+  - name: *network-name
 update:
   canaries: 1
-  max_in_flight: 1
-  serial: true
   canary_watch_time: 10000-300000
   update_watch_time: 10000-300000
-
+  max_in_flight: 1
+  serial: true
 variables:
 - name: kubo-admin-password
   type: password
 - name: kubelet-password
   type: password
+- name: kube-proxy-password
+  type: password
+- name: kube-scheduler-password
+  type: password
+- name: route-sync-password
+  type: password
 - name: kubo_ca
   type: certificate
   options:
-    is_ca: true
     common_name: ca
+    is_ca: true
 - name: tls-kubelet
   type: certificate
   options:
+    alternative_names: []
     ca: kubo_ca
-    common_name: ((kubernetes_master_host))
-    alternative_names: [((kubernetes_master_host))]
-    organization: "system:nodes"
+    common_name: kubelet.kubo.internal
+    organization: system:nodes
 - name: tls-kubernetes
   type: certificate
   options:
-    ca: kubo_ca
-    organization: "system:masters"
-    common_name: ((kubernetes_master_host))
     alternative_names:
     - ((kubernetes_master_host))
     - 10.100.200.1
@@ -161,3 +157,14 @@ variables:
     - kubernetes.default.svc
     - kubernetes.default.svc.cluster.local
     - master.kubo
+    ca: kubo_ca
+    common_name: ((kubernetes_master_host))
+    organization: system:masters
+- name: tls-docker
+  type: certificate
+  options:
+    ca: kubo_ca
+    common_name: docker.kubo.internal
+
+
+
