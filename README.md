@@ -60,9 +60,9 @@ This is a guide to install [Kubo](https://github.com/cloudfoundry-incubator/kubo
   	bosh -e kubo update-runtime-config -n bosh-deployment/runtime-configs/dns.yml
 	```
 
-1. Upload the stemcell for usage with KUBO
+1. Upload the stemcell for usage with KUBO. Use the same stemcell version as used by the bosh deployment.
 	```bash
-	bosh -e kubo upload-stemcell "https://s3.amazonaws.com/bosh-core-stemcells/warden/bosh-stemcell-3468.13-warden-boshlite-ubuntu-trusty-go_agent.tgz"
+	bosh -e kubo upload-stemcell "https://s3.amazonaws.com/bosh-core-stemcells/warden/bosh-stemcell-3468.21-warden-boshlite-ubuntu-trusty-go_agent.tgz"
 	```
 
 1. Upload the latest version of the Kubo release
