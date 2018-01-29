@@ -77,7 +77,7 @@ This is a guide to install [Kubo](https://github.com/cloudfoundry-incubator/kubo
 
 1. Deploy Kubo
 
-	This deployment of Kubo consists of only a single master, kuboetcd and two workers
+	This deployment of Kubo consists of only a single master/etcd node and three workers
  
 	```bash
 	bosh -e kubo deploy -d kubo-bosh-lite kubo-bosh-lite/kubo.yml -v kubernetes_master_host=10.240.0.2
@@ -91,9 +91,10 @@ This is a guide to install [Kubo](https://github.com/cloudfoundry-incubator/kubo
 
 1. Set-up 'kubectl' to access the newly created cluster
 	```bash
-	CREDHUB_PWD=$(bosh int --path /credhub_cli_password kubo/creds.yml)
-	CREDHUB_CA_CERT=$(bosh int --path /credhub_tls/ca kubo/creds.yml)
-	credhub login -u credhub-cli -p ${CREDHUB_PWD} -s https://192.168.50.6:8844 --skip-tls-validation
+	export CREDHUB_CLIENT=credhub-admin
+	export CREDHUB_SECRET=$(bosh int --path /credhub_admin_client_secret kubo/creds.yml)
+	export CREDHUB_CA_CERT=$(bosh int --path /credhub_tls/ca kubo/creds.yml)
+	credhub login -s https://192.168.50.6:8844 --skip-tls-validation
 	bosh int <(credhub get -n "/kubo-bosh-lite/kubo-bosh-lite/tls-kubernetes" --output-json) --path=/value/ca > kubo/kubernetes.crt
 	kubectl config set-cluster kubo-bosh-lite --server https://10.240.0.2:8443 --embed-certs=true --certificate-authority=kubo/kubernetes.crt 
 	KUBERNETES_PWD=$(bosh int <(credhub get -n "/kubo-bosh-lite/kubo-bosh-lite/kubo-admin-password" --output-json) --path=/value)
