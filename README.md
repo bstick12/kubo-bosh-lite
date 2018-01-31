@@ -1,4 +1,4 @@
-# Kubo on Bosh Lite
+# Kubo/CFCR on Bosh Lite
 
 This is a guide to install [Kubo](https://github.com/cloudfoundry-incubator/kubo-release) on BOSH Lite
 
@@ -63,11 +63,6 @@ This is a guide to install [Kubo](https://github.com/cloudfoundry-incubator/kubo
 1. Upload the stemcell for usage with KUBO. Use the same stemcell version as used by the bosh deployment.
 	```bash
 	bosh -e kubo upload-stemcell "https://s3.amazonaws.com/bosh-core-stemcells/warden/bosh-stemcell-3468.21-warden-boshlite-ubuntu-trusty-go_agent.tgz"
-	```
-
-1. Upload the latest version of the Kubo release
-	```bash
-	bosh -e kubo upload-release "https://github.com/cloudfoundry-incubator/kubo-release/releases/download/v0.10.0/kubo-release-0.10.0.tgz"
 	```
 
 1. Update the `cloud-config' for the kubo environment
